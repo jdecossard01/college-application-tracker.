@@ -6,6 +6,7 @@
 .pnp.js
 .yarn/install-state.gz
 
+/.idea/
 /.idea/*
 !/.idea/runConfigurations
 
@@ -48,3 +49,7 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# VS Code
+/.vscode/
+/.vscode/*
