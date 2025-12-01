@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -13,17 +13,29 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import { hasSupabaseConfig } from '@/lib/supabase-config'
 
 export function LoginCard() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const isSupabaseConfigured = useMemo(() => hasSupabaseConfig(), [])
 
   const handleGoogleLogin = useCallback(async () => {
     setIsLoading(true)
     setError(null)
 
     try {
+      if (!isSupabaseConfigured) {
+        throw new Error('Supabase environment variables are missing. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.')
+      }
+
       const supabase = createSupabaseBrowserClient()
+
+      if (!supabase) {
+        throw new Error('Supabase client could not be initialized. Please check your configuration.')
+      }
+
       const redirectTo =
         typeof window !== 'undefined'
           ? `${window.location.origin}/auth/callback?next=/dashboard`
@@ -47,7 +59,7 @@ export function LoginCard() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [isSupabaseConfigured])
 
   return (
     <Card className="w-full max-w-md glass-card shadow-2xl transition-all duration-300 hover:shadow-3xl">
@@ -61,7 +73,7 @@ export function LoginCard() {
       <CardContent className="flex flex-col gap-4">
         <Button
           className="w-full"
-          disabled={isLoading}
+          disabled={isLoading || !isSupabaseConfigured}
           onClick={handleGoogleLogin}
           size="lg"
           variant="default"
@@ -74,10 +86,16 @@ export function LoginCard() {
           ) : (
             <>
               <GoogleIcon className="h-5 w-5" />
-              Continue with Google
+              {isSupabaseConfigured ? 'Continue with Google' : 'Configure Supabase to sign in'}
             </>
           )}
         </Button>
+        {!isSupabaseConfigured && (
+          <p className="rounded-md border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-100">
+            Add <code className="font-mono">NEXT_PUBLIC_SUPABASE_URL</code> and
+            <code className="font-mono"> NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to enable login.
+          </p>
+        )}
         {error && (
           <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}

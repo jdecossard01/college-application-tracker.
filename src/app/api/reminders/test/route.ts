@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+
 import { sendReminderEmail } from '@/lib/email'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 /**
  * Test endpoint to send a reminder email
@@ -10,6 +11,14 @@ import { sendReminderEmail } from '@/lib/email'
 export async function POST(request: Request) {
   try {
     const supabase = await createSupabaseServerClient()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Supabase environment variables are missing. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.' },
+        { status: 500 },
+      )
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -51,4 +60,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to send test email' }, { status: 500 })
   }
 }
-
