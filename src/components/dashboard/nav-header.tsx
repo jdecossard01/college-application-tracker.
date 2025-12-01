@@ -19,6 +19,11 @@ export function NavHeader({ userEmail }: NavHeaderProps) {
     setIsLoading(true)
     try {
       const supabase = createSupabaseBrowserClient()
+
+      if (!supabase) {
+        throw new Error('Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to sign out securely.')
+      }
+
       await supabase.auth.signOut()
       router.push('/')
       router.refresh()
@@ -57,4 +62,3 @@ export function NavHeader({ userEmail }: NavHeaderProps) {
     </header>
   )
 }
-

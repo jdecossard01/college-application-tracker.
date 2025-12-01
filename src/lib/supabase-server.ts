@@ -1,23 +1,22 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+import { getSupabaseConfig } from './supabase-config'
+
 /**
  * Creates a Supabase client for server-side operations.
  * This client reads cookies to maintain the user session.
  */
 export async function createSupabaseServerClient() {
-  const cookieStore = await cookies()
+  const config = getSupabaseConfig()
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      'Missing Supabase environment variables. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.',
-    )
+  if (!config) {
+    return null
   }
 
-  return createServerClient(supabaseUrl, supabaseAnonKey, {
+  const cookieStore = await cookies()
+
+  return createServerClient(config.supabaseUrl, config.supabaseAnonKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll()

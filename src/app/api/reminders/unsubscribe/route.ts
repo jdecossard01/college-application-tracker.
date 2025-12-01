@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+
 import { sendUnsubscribeConfirmationEmail } from '@/lib/email'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 /**
  * Unsubscribe endpoint
@@ -62,6 +63,14 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const supabase = await createSupabaseServerClient()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Supabase environment variables are missing. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.' },
+        { status: 500 },
+      )
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -101,4 +110,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to process unsubscribe' }, { status: 500 })
   }
 }
-

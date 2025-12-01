@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+
 import { sendReminderConfirmationEmail } from '@/lib/email'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 export async function POST(request: Request) {
   try {
     const supabase = await createSupabaseServerClient()
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Supabase environment variables are missing. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.' },
+        { status: 500 },
+      )
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser()
