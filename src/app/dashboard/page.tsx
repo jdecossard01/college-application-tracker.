@@ -3,9 +3,24 @@ import { Institution } from "@/payload-types";
 
 export default async function DashboardPage() {
   // Temporary fetch - your partner may replace this
-  const res = await fetch("http://localhost:3000/api/tracked?limit=50", {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
+  const res = await fetch(`${baseUrl}/api/tracked?limit=50`, {
     cache: "no-store",
   });
+
+  if (!res.ok) {
+    return (
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <h1 className="text-4xl font-bold mb-8">Your Dashboard</h1>
+        <p className="text-gray-500">
+          Unable to load tracked institutions right now. Please try again later.
+        </p>
+      </div>
+    );
+  }
 
   const data: { docs?: Institution[] } = await res.json();
 
